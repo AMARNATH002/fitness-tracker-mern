@@ -18,7 +18,7 @@ function Home() {
     <div className="home-page">
       {/* Welcome Section */}
       <div className="welcome-section">
-        <h1>Welcome to <span className="highlight">Fitness Tracker</span></h1>
+        <h1>Welcome to <span className="highlight">GHOST Fitness Tracker</span></h1>
         <p className="tagline">Track your workouts, stay consistent, and challenge yourself daily.</p>
 
         <div className="auth-buttons">
@@ -136,11 +136,11 @@ function App() {
         <nav className="simple-navbar">
           <div className="navbar-content">
             <div className="navbar-left">
-              <h1 className="navbar-title">FITNESS CHALLENGE TRACKER</h1>
-              <p className="navbar-subtitle">KEC</p>
+              <h1 className="navbar-title"> GHOST FITNESS CHALLENGE TRACKER</h1>
+              
             </div>
             <div className="navbar-yeah-buddy1">
-              <span className="yeah-buddy-text">YEAH BUDDY😎</span>
+              <span className="yeah-buddy-text">YEAH BUDDY 🏋🎧</span>
             </div>
             <div className="navbar-right">
               <Link to="/" className="nav-link">HOME</Link>
@@ -158,7 +158,7 @@ function App() {
               )}
             </div>
             <div className="navbar-yeah-buddy">
-              <span className="yeah-buddy-text">LIGHT WEIGHT👑</span>
+              <span className="yeah-buddy-text">LIGHT WEIGHT⛓️ 💪🏼</span>
             </div>
           </div>
         </nav>
@@ -209,7 +209,7 @@ function App() {
 
         {/* Footer */}
         <footer className="app-footer">
-          <p>💪🏻Be Consistent & Strong -🏋️‍♂️- 👊🏻- KEC Fitness Tracker 💪🏻</p>
+          <p>💪🏻Be Consistent & Strong -🏋️‍♂️- 👊🏻- GHOST Fitness Tracker 💪🏻</p>
         </footer>
       </div>
     </Router>
