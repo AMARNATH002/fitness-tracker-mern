@@ -230,6 +230,119 @@
 }
 
 
+/* Unique Features Styles */
+.fitness-plant-section {
+  margin-top: 30px;
+  background: #f1f8e9;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #8bc34a;
+}
+
+.fitness-plant-section h3 {
+  color: #33691e;
+  margin-bottom: 5px;
+}
+
+.plant-desc {
+  color: #558b2f;
+  margin-bottom: 15px;
+}
+
+.plant-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: 20px;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(139, 195, 74, 0.2);
+}
+
+.plant-emoji {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.plant-text {
+  font-weight: bold;
+  color: #33691e;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.excuse-destroyer {
+  margin-top: 30px;
+  background: #ffebee;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #f44336;
+}
+
+.excuse-destroyer h3 {
+  color: #c62828;
+  margin-bottom: 5px;
+}
+
+.excuse-destroyer p {
+  color: #d32f2f;
+  margin-bottom: 15px;
+}
+
+.excuse-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.excuse-input-group input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  background: white !important;
+  color: #333 !important;
+}
+
+.btn-destroy {
+  background: #f44336 !important;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-destroy:hover {
+  background: #d32f2f !important;
+}
+
+.destroyer-message {
+  background: #f44336;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-pop {
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .profile-container {
@@ -251,5 +364,10 @@
   .stat-number {
     font-size: 1.5rem;
   }
+  
+  .excuse-input-group {
+    flex-direction: column;
+  }
 }
+
 

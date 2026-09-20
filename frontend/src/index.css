@@ -21,10 +21,6 @@ body {
   color: var(--text-primary) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%) !important;
-  background-attachment: fixed !important;
 }
 
 /* Override existing black backgrounds */
@@ -32,19 +28,15 @@ body {
   background: transparent !important;
 }
 
-.sidebar, .auth-card, .program-card, .feature-card, .dashboard-card, .workout-card, .goal-card, .community-feed-item, .analytics-card {
-  background: var(--glass-bg) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+.sidebar, .auth-card, .program-card, .feature-card, .dashboard-card, .workout-card, .goal-card, .community-feed-item, .analytics-card, .profile-card {
+  background: var(--bg-secondary) !important;
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-shadow) !important;
-  border-radius: 16px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 12px !important;
 }
 
 .simple-navbar {
-  background: rgba(15, 23, 42, 0.8) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  background: var(--bg-secondary) !important;
   border-bottom: 1px solid var(--glass-border) !important;
 }
 

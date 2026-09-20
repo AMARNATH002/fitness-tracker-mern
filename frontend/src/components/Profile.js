@@ -10,6 +10,30 @@ function Profile() {
     completedWorkouts: 0,
     streak: 0,
   });
+  
+  // New features state
+  const [excuse, setExcuse] = useState("");
+  const [destroyerMessage, setDestroyerMessage] = useState("");
+
+  const destroyExcuse = () => {
+    if (!excuse.trim()) return;
+    const messages = [
+      "No excuses. 15 minutes is 1% of your day. Get up! 👊",
+      "Excuses don't burn calories. Sweat does! 💦",
+      "Your body can stand almost anything. It's your mind you have to convince. 🧠",
+      "Don't stop when you're tired. Stop when you're DONE. 🛑",
+      "Someone busier than you is working out right now. What's stopping you? ⏰"
+    ];
+    setDestroyerMessage(messages[Math.floor(Math.random() * messages.length)]);
+    setExcuse("");
+  };
+
+  const getPlantStage = (streak) => {
+    if (streak === 0) return { emoji: "🌱", text: "Seed (Time to start watering it with sweat!)" };
+    if (streak <= 3) return { emoji: "🌿", text: "Sprout (Keep going, it's growing!)" };
+    if (streak <= 6) return { emoji: "🪴", text: "Healthy Plant (Looking strong!)" };
+    return { emoji: "🌳", text: "Mighty Tree (Unstoppable streak!)" };
+  };
 
   const calculateStreak = (workouts) => {
     if (!workouts || workouts.length === 0) return 0;
@@ -183,6 +207,37 @@ function Profile() {
                <strong>Duration:</strong> {getTotalDaysByLevel(user.fitnessLevel || user.role)} days<br />
                <strong>Goal:</strong> Complete daily workouts to build fitness habits</p>
           </div>
+        </div>
+
+        {/* Unique Feature 1: Fitness Plant */}
+        <div className="fitness-plant-section">
+          <h3>🌱 Your Fitness Buddy</h3>
+          <p className="plant-desc">Your plant grows when you maintain your workout streak!</p>
+          <div className="plant-display">
+            <div className="plant-emoji">{getPlantStage(challengeProgress.streak).emoji}</div>
+            <div className="plant-text">{getPlantStage(challengeProgress.streak).text}</div>
+          </div>
+        </div>
+
+        {/* Unique Feature 2: Excuse Destroyer */}
+        <div className="excuse-destroyer">
+          <h3>🔥 Excuse Destroyer</h3>
+          <p>Feeling lazy? Type your excuse below.</p>
+          <div className="excuse-input-group">
+            <input 
+              type="text" 
+              value={excuse} 
+              onChange={(e) => setExcuse(e.target.value)} 
+              placeholder="e.g., I'm too tired today..."
+              onKeyPress={(e) => e.key === 'Enter' && destroyExcuse()}
+            />
+            <button onClick={destroyExcuse} className="btn-destroy">Destroy Excuse</button>
+          </div>
+          {destroyerMessage && (
+            <div className="destroyer-message animate-pop">
+              {destroyerMessage}
+            </div>
+          )}
         </div>
 
         {/* Achievements */}
