@@ -1,4 +1,5 @@
 import React from "react";
+import "./Contact.css";
 
 function Contact() {
   return (
@@ -19,7 +20,7 @@ function Contact() {
             </div>
 
             <div className="contact-section">
-              <h3>🏢 KEC Fitness Center</h3>
+              <h3>🏢 Ghost Fitness Center</h3>
               <p>Visit us at Kongu Engineering College</p>
               <p>Perundurai, Erode - 638060</p>
               <p>Tamil Nadu, India</p>

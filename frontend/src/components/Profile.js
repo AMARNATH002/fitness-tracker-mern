@@ -251,8 +251,136 @@ function Profile() {
             {challengeProgress.streak >= 5 && <div className="achievement-badge">⚡ Streak Master</div>}
           </div>
         </div>
+        
+        {/* Competitions / Community Section */}
+        <div className="competitions-section" style={{ marginTop: '30px', padding: '20px', background: '#f5f7fa', borderRadius: '12px' }}>
+          <h3>🏆 Community Competitions</h3>
+          <p>Ask questions, post about competitions, and reply to others.</p>
+          
+          <div className="competition-input-group" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <input 
+              type="text" 
+              id="comp-input"
+              placeholder="Post about an upcoming competition..."
+              style={{ flexGrow: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
+            />
+            <button 
+              className="btn btn-primary"
+              onClick={() => {
+                const input = document.getElementById('comp-input');
+                if (!input.value.trim()) return;
+                
+                const newPost = {
+                  id: Date.now().toString(),
+                  author: user.name,
+                  content: input.value,
+                  date: new Date().toISOString(),
+                  replies: []
+                };
+                
+                const existingPosts = JSON.parse(localStorage.getItem('competitions') || '[]');
+                localStorage.setItem('competitions', JSON.stringify([newPost, ...existingPosts]));
+                input.value = '';
+                // force re-render by dispatching an event
+                window.dispatchEvent(new Event('storage'));
+              }}
+            >
+              Post
+            </button>
+          </div>
+          
+          <div className="competitions-feed">
+            <CompetitionFeed />
+          </div>
+        </div>
+
       </div>
     </div>
   );
 }
+
+// Sub-component to manage competition posts
+function CompetitionFeed() {
+  const [posts, setPosts] = useState([]);
+
+  const loadPosts = () => {
+    setPosts(JSON.parse(localStorage.getItem('competitions') || '[]'));
+  };
+
+  useEffect(() => {
+    loadPosts();
+    window.addEventListener('storage', loadPosts);
+    return () => window.removeEventListener('storage', loadPosts);
+  }, []);
+
+  const addReply = (postId, replyContent) => {
+    if (!replyContent.trim()) return;
+    const userData = JSON.parse(sessionStorage.getItem('user'));
+    const authorName = userData ? userData.name : 'Unknown';
+    
+    const updatedPosts = posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          replies: [...post.replies, {
+            id: Date.now().toString(),
+            author: authorName,
+            content: replyContent,
+            date: new Date().toISOString()
+          }]
+        };
+      }
+      return post;
+    });
+    
+    localStorage.setItem('competitions', JSON.stringify(updatedPosts));
+    setPosts(updatedPosts);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      {posts.length === 0 ? <p>No posts yet. Be the first to start a discussion!</p> : null}
+      {posts.map(post => (
+        <div key={post.id} style={{ background: '#fff', padding: '15px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <div style={{ fontWeight: 'bold', color: '#1a237e' }}>{post.author}</div>
+          <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px' }}>{new Date(post.date).toLocaleDateString()}</div>
+          <p style={{ margin: '0 0 10px 0' }}>{post.content}</p>
+          
+          {/* Replies */}
+          {post.replies && post.replies.length > 0 && (
+            <div style={{ marginLeft: '20px', paddingLeft: '10px', borderLeft: '3px solid #eee', marginBottom: '10px' }}>
+              {post.replies.map(reply => (
+                <div key={reply.id} style={{ marginBottom: '8px' }}>
+                  <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{reply.author}: </span>
+                  <span style={{ fontSize: '0.9rem' }}>{reply.content}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Reply Input */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <input 
+              type="text" 
+              id={`reply-${post.id}`}
+              placeholder="Write a reply..."
+              style={{ flexGrow: 1, padding: '6px 10px', borderRadius: '20px', border: '1px solid #ddd', fontSize: '0.9rem' }}
+            />
+            <button 
+              style={{ padding: '6px 12px', background: '#e3f2fd', color: '#1565c0', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '600' }}
+              onClick={() => {
+                const input = document.getElementById(`reply-${post.id}`);
+                addReply(post.id, input.value);
+                input.value = '';
+              }}
+            >
+              Reply
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default Profile;

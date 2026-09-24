@@ -109,6 +109,54 @@ function UserList() {
           ))}
         </div>
       )}
+      
+      {/* Competitions / Community Feed */}
+      <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px solid #333' }}>
+        <h2 style={{ color: '#fff' }}>🏆 Participants / Competitions</h2>
+        <p style={{ color: '#bbb' }}>Check out what the community is talking about.</p>
+        <ReadOnlyCompetitionFeed />
+      </div>
+
+    </div>
+  );
+}
+
+function ReadOnlyCompetitionFeed() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const loadPosts = () => {
+      setPosts(JSON.parse(localStorage.getItem('competitions') || '[]'));
+    };
+    loadPosts();
+    window.addEventListener('storage', loadPosts);
+    return () => window.removeEventListener('storage', loadPosts);
+  }, []);
+
+  if (posts.length === 0) {
+    return <p style={{ color: '#888' }}>No competitions posted yet. Head to your profile to post one!</p>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      {posts.map(post => (
+        <div key={post.id} style={{ background: '#222', padding: '15px', borderRadius: '8px', color: '#fff', border: '1px solid #444' }}>
+          <div style={{ fontWeight: 'bold', color: '#03a9f4' }}>{post.author}</div>
+          <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px' }}>{new Date(post.date).toLocaleDateString()}</div>
+          <p style={{ margin: '0 0 10px 0' }}>{post.content}</p>
+          
+          {post.replies && post.replies.length > 0 && (
+            <div style={{ marginLeft: '20px', paddingLeft: '10px', borderLeft: '3px solid #555' }}>
+              {post.replies.map(reply => (
+                <div key={reply.id} style={{ marginBottom: '8px' }}>
+                  <span style={{ fontWeight: '600', fontSize: '0.9rem', color: '#bbdefb' }}>{reply.author}: </span>
+                  <span style={{ fontSize: '0.9rem', color: '#ddd' }}>{reply.content}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

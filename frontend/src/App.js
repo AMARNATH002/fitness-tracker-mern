@@ -10,43 +10,49 @@ import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Contact from "./components/Contact";
 import Goals from "./components/Goals";
+import Workouts from "./components/Workouts";
+import MusicPlayer from "./components/MusicPlayer";
 import "./App.css";
 
+import ronnieImage from './assets/images/ronnie.png';
 
 function Home() {
   return (
-    <div className="home-page">
-      {/* Welcome Section */}
-      <div className="welcome-section">
-        <h1>Welcome to <span className="highlight">GHOST Fitness Tracker</span></h1>
-        <p className="tagline">Track your workouts, stay consistent, and challenge yourself daily.</p>
+    <div className="home-page" style={{ 
+      backgroundImage: `url(${ronnieImage})`, 
+      backgroundSize: 'cover', 
+      backgroundPosition: 'center', 
+      backgroundAttachment: 'fixed',
+      minHeight: '80vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        zIndex: 1
+      }}></div>
 
-        <div className="auth-buttons">
-          <Link to="/signup" className="btn btn-signup">Sign Up</Link>
-          <Link to="/login" className="btn btn-login">Login</Link>
-        </div>
-      </div>
+      <div className="welcome-section" style={{ zIndex: 2, textAlign: 'center', color: '#fff', maxWidth: '800px', padding: '40px' }}>
+        <h1 style={{ fontSize: '4rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', margin: '0 0 20px', color: '#ff9800' }}>
+          YEAH BUDDY!
+        </h1>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 20px', textTransform: 'uppercase' }}>
+          Welcome to <span className="highlight" style={{ color: '#03a9f4' }}>GHOST Fitness</span>
+        </h2>
+        <p className="tagline" style={{ fontSize: '1.2rem', marginBottom: '30px', fontWeight: '500' }}>
+          Everybody wants to be a bodybuilder, but nobody wants to lift no heavy-ass weights! Track your workouts and build your legacy.
+        </p>
 
-      {/* Program Level Cards */}
-      <div className="programs-section">
-        <div className="programs-grid">
-          <div className="program-card">
-            <div className="card-icon">💪</div>
-            <h3>Beginner Level</h3>
-            <p>Perfect for students new to fitness</p>
-          </div>
-
-          <div className="program-card">
-            <div className="card-icon">💪</div>
-            <h3>Intermediate Level</h3>
-            <p>For students with some fitness experience</p>
-          </div>
-
-          <div className="program-card">
-            <div className="card-icon">💪</div>
-            <h3>Advanced Level</h3>
-            <p>For fitness enthusiasts and athletes</p>
-          </div>
+        <div className="auth-buttons" style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+          <Link to="/signup" className="btn btn-signup" style={{ padding: '15px 40px', fontSize: '1.1rem', backgroundColor: '#ff9800', color: '#000', fontWeight: 'bold' }}>START TRAINING</Link>
+          <Link to="/login" className="btn btn-login" style={{ padding: '15px 40px', fontSize: '1.1rem', backgroundColor: 'transparent', border: '2px solid #ff9800', color: '#ff9800', fontWeight: 'bold' }}>LOGIN</Link>
         </div>
       </div>
     </div>
@@ -136,16 +142,14 @@ function App() {
         <nav className="simple-navbar">
           <div className="navbar-content">
             <div className="navbar-left">
+              <span className="yeah-buddy-text" style={{marginRight: '15px', color: '#ff9800'}}>YEAH BUDDY 🏋🎧</span>
               <h1 className="navbar-title"> GHOST FITNESS CHALLENGE TRACKER</h1>
-              
             </div>
-            <div className="navbar-yeah-buddy1">
-              <span className="yeah-buddy-text">YEAH BUDDY 🏋🎧</span>
-            </div>
+            
             <div className="navbar-right">
               <Link to="/" className="nav-link">HOME</Link>
               <Link to="/about" className="nav-link">ABOUT US</Link>
-              <Link to="/role" className="nav-link">PROGRAMS</Link>
+              <Link to="/workouts" className="nav-link">WORKOUTS</Link>
               <Link to="/users" className="nav-link">BLOG</Link>
               <Link to="/profile" className="nav-link">MY PROFILE</Link>
               <Link to="/goals" className="nav-link">GOALS</Link>
@@ -156,9 +160,7 @@ function App() {
               {isLoggedIn && (
                 <Link to="/login" onClick={handleLogout} className="nav-link">LOGOUT</Link>
               )}
-            </div>
-            <div className="navbar-yeah-buddy">
-              <span className="yeah-buddy-text">LIGHT WEIGHT⛓️ 💪🏼</span>
+              <span className="yeah-buddy-text" style={{marginLeft: '15px', color: '#ff9800'}}>LIGHT WEIGHT⛓️ 💪🏼</span>
             </div>
           </div>
         </nav>
@@ -180,6 +182,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/workouts" element={<Workouts />} />
             <Route path="/role" element={<RoleSelect />} />
             <Route path="/challenges" element={
               <ProtectedRoute>
@@ -211,6 +214,7 @@ function App() {
         <footer className="app-footer">
           <p>💪🏻Be Consistent & Strong -🏋️‍♂️- 👊🏻- GHOST Fitness Tracker 💪🏻</p>
         </footer>
+        <MusicPlayer />
       </div>
     </Router>
   );

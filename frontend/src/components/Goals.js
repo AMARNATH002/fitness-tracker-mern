@@ -223,6 +223,9 @@ function Goals() {
               />
               <span className="unit">per day</span>
             </div>
+            <div className="target-progress-bar">
+               <div className="target-progress-fill" style={{ width: `${Math.min((goals.currentStreak > 0 ? 1 : 0) / (goals.dailyWorkouts || 1) * 100, 100)}%` }}></div>
+            </div>
             <p className="input-help">How many workouts do you want to complete each day?</p>
           </div>
 
@@ -239,6 +242,9 @@ function Goals() {
               />
               <span className="unit">per week</span>
             </div>
+            <div className="target-progress-bar">
+               <div className="target-progress-fill" style={{ width: `${Math.min(goals.currentStreak / (goals.weeklyWorkouts || 1) * 100, 100)}%` }}></div>
+            </div>
             <p className="input-help">Total workouts you want to complete each week</p>
           </div>
 
@@ -254,6 +260,9 @@ function Goals() {
                 max="200"
               />
               <span className="unit">per month</span>
+            </div>
+            <div className="target-progress-bar">
+               <div className="target-progress-fill" style={{ width: `${Math.min((goals.currentStreak * 3) / (goals.monthlyWorkouts || 1) * 100, 100)}%` }}></div>
             </div>
             <p className="input-help">Total workouts you want to complete each month</p>
           </div>
