@@ -8,12 +8,20 @@ function Login() {
     password: ""
   });
 
+  const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // Prevent duplicate submissions
+
+    setLoading(true);
+    setStatusMsg("⏳ Connecting to server... Please wait (may take ~30s on first load)");
+
     try {
       const res = await api.post("/users/login", formData);
 
@@ -21,13 +29,14 @@ function Login() {
         throw new Error("Invalid response from server");
       }
 
-      alert("Login successful! Welcome back! 💪");
+      setStatusMsg("✅ Login successful! Redirecting...");
 
       sessionStorage.setItem("user", JSON.stringify(res.data.user));
       sessionStorage.setItem("token", res.data.token);
 
-      // Add a small delay to ensure sessionStorage is set
       setTimeout(() => {
+        alert("Login successful! Welcome back! 💪");
+
         const next =
           res.data.user?.accountRole === "Admin"
             ? "/admin"
@@ -39,8 +48,11 @@ function Login() {
       }, 100);
     } catch (error) {
       console.error("Login error:", error);
+      setStatusMsg("");
       const errorMessage = error.response?.data?.error || error.message || "Login failed. Please try again.";
       alert(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +81,7 @@ function Login() {
               onChange={handleChange}
               required
               className="form-input"
+              disabled={loading}
             />
           </div>
 
@@ -81,11 +94,56 @@ function Login() {
               onChange={handleChange}
               required
               className="form-input"
+              disabled={loading}
             />
           </div>
 
-          <button type="submit" className="auth-btn">
-            GET BACK TO TRAINING
+          {/* Loading status message */}
+          {statusMsg && (
+            <div style={{
+              padding: "10px 14px",
+              borderRadius: "8px",
+              backgroundColor: "rgba(255, 152, 0, 0.15)",
+              border: "1px solid #ff9800",
+              color: "#ff9800",
+              fontSize: "0.85rem",
+              textAlign: "center",
+              marginBottom: "10px",
+              fontWeight: "500"
+            }}>
+              {statusMsg}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="auth-btn"
+            disabled={loading}
+            style={{
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px"
+            }}
+          >
+            {loading ? (
+              <>
+                <span style={{
+                  display: "inline-block",
+                  width: "16px",
+                  height: "16px",
+                  border: "2px solid rgba(0,0,0,0.3)",
+                  borderTop: "2px solid #000",
+                  borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite"
+                }}></span>
+                LOGGING IN...
+              </>
+            ) : (
+              "GET BACK TO TRAINING"
+            )}
           </button>
         </form>
 
@@ -95,6 +153,14 @@ function Login() {
           </Link>
         </div>
       </div>
+
+      {/* Spinner keyframes */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
