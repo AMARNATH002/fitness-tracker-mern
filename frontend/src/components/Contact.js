@@ -14,15 +14,15 @@ function Contact() {
             <div className="contact-section">
               <h3>📧 Email Support</h3>
               <p>For technical support and general inquiries:</p>
-              <a href="mailto:support@fitness-tracker.com" className="contact-link">
-                support@fitness-tracker.com
+              <a href="mailto:Ghostfitnesstrack@gmail.com" className="contact-link">
+                ghostfitnesstrack@gmail.com
               </a>
             </div>
 
             <div className="contact-section">
               <h3>🏢 Ghost Fitness Center</h3>
-              <p>Visit us at Kongu Engineering College</p>
-              <p>Perundurai, Erode - 638060</p>
+              <p>Visit us Ghost Fitness Tracker</p>
+              <p>Virudhachalam ,Cuddalore 638060</p>
               <p>Tamil Nadu, India</p>
             </div>
 
