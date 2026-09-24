@@ -1,7 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Contact.css";
 
 function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [submitStatus, setSubmitStatus] = useState(null); // null | 'success' | 'error'
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (submitting) return;
+
+    setSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // Simulate sending (replace with real API call if backend endpoint is added)
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      // Reset form on success
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setSubmitStatus("success");
+    } catch (err) {
+      setSubmitStatus("error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="simple-page">
       <div className="page-container">
@@ -48,28 +82,100 @@ function Contact() {
 
           <div className="contact-form-section">
             <h3>Send us a Message</h3>
-            <form className="contact-form">
+
+            {/* Success / Error feedback */}
+            {submitStatus === "success" && (
+              <div style={{
+                padding: "12px 16px",
+                borderRadius: "8px",
+                backgroundColor: "rgba(76, 175, 80, 0.15)",
+                border: "1px solid #4CAF50",
+                color: "#4CAF50",
+                marginBottom: "16px",
+                fontWeight: "500"
+              }}>
+                ✅ Message sent successfully! We'll get back to you within 24 hours. 💪
+              </div>
+            )}
+            {submitStatus === "error" && (
+              <div style={{
+                padding: "12px 16px",
+                borderRadius: "8px",
+                backgroundColor: "rgba(244, 67, 54, 0.15)",
+                border: "1px solid #F44336",
+                color: "#F44336",
+                marginBottom: "16px",
+                fontWeight: "500"
+              }}>
+                ❌ Failed to send message. Please try again or email us directly.
+              </div>
+            )}
+
+            <form className="contact-form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="name">Name *</label>
-                <input type="text" id="name" name="name" required />
+                <label htmlFor="contact-name">Name *</label>
+                <input
+                  type="text"
+                  id="contact-name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={submitting}
+                  placeholder="Your full name"
+                />
               </div>
 
               <div className="form-group">
-                <label htmlFor="email">Email *</label>
-                <input type="email" id="email" name="email" required />
+                <label htmlFor="contact-email">Email *</label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={submitting}
+                  placeholder="your@email.com"
+                />
               </div>
 
               <div className="form-group">
-                <label htmlFor="subject">Subject *</label>
-                <input type="text" id="subject" name="subject" required />
+                <label htmlFor="contact-subject">Subject *</label>
+                <input
+                  type="text"
+                  id="contact-subject"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  disabled={submitting}
+                  placeholder="What is your message about?"
+                />
               </div>
 
               <div className="form-group">
-                <label htmlFor="message">Message *</label>
-                <textarea id="message" name="message" rows="5" required></textarea>
+                <label htmlFor="contact-message">Message *</label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  rows="5"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  disabled={submitting}
+                  placeholder="Write your message here..."
+                ></textarea>
               </div>
 
-              <button type="submit" className="btn btn-primary">Send Message</button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={submitting}
+                style={{ opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+              >
+                {submitting ? "⏳ Sending..." : "📨 Send Message"}
+              </button>
             </form>
           </div>
         </div>

@@ -279,6 +279,17 @@ function Challenges() {
     }
   };
 
+  const handleReset = async (exercise) => {
+    // Reset the completion state locally
+    setCompletedWorkouts(prev => prev.filter(e => e !== exercise));
+    setDailyCompletions(prev => {
+      const updated = { ...prev };
+      delete updated[exercise];
+      return updated;
+    });
+    setButtonStates(prev => ({ ...prev, [exercise]: 'normal' }));
+  };
+
   const isCompleted = (exercise) => completedWorkouts.includes(exercise);
 
   const openWorkoutVideo = (workoutName) => {
@@ -404,6 +415,15 @@ function Challenges() {
                       >
                         {completed ? 'Completed' : disabledToday ? 'Completed Today!' : 'Mark as Complete'}
                       </button>
+                      {(completed || disabledToday) && (
+                        <button
+                          className="reset-btn"
+                          onClick={() => handleReset(exerciseKey)}
+                          title="Reset completion"
+                        >
+                          🔄 Reset
+                        </button>
+                      )}
                       <button
                         className="video-btn"
                         onClick={() => openWorkoutVideo(w.exercise || w.name)}
@@ -452,6 +472,15 @@ function Challenges() {
                      buttonStates[challenge.exercise] === 'completed' ? "Completed!" : 
                      "Mark as Complete"}
                   </button>
+                  {(dailyCompletions[challenge.exercise] >= 1 || isCompleted(challenge.exercise)) && (
+                    <button
+                      className="reset-btn"
+                      onClick={() => handleReset(challenge.exercise)}
+                      title="Reset this workout"
+                    >
+                      🔄 Reset
+                    </button>
+                  )}
                   <button
                     className="video-btn"
                     onClick={() => openWorkoutVideo(challenge.exercise)}

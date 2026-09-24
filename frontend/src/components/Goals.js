@@ -1,521 +1,214 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import api from '../api';
-import './Goals.css';
-
-const defaultGoals = {
-  dailyWorkouts: 1,
-  weeklyWorkouts: 5,
-  monthlyWorkouts: 20,
-  currentStreak: 0,
-  longestStreak: 0,
-  smartGoals: [],
-  milestones: [],
-  targetWeight: null,
-  targetBodyFat: null,
-  targetMuscleMass: null
-};
+import React, { useState, useEffect } from "react";
+import api from "../api";
+import "./Goals.css";
 
 function Goals() {
-  const [goals, setGoals] = useState(defaultGoals);
+  const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [newGoal, setNewGoal] = useState({ title: "", target: "", unit: "kg" });
+  const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
-  const [showSmartGoalForm, setShowSmartGoalForm] = useState(false);
-  const [newSmartGoal, setNewSmartGoal] = useState({
-    title: '',
-    description: '',
-    targetValue: '',
-    currentValue: '0',
-    unit: '',
-    deadline: '',
-    category: 'fitness',
-    priority: 'medium'
-  });
 
-  const loadGoals = useCallback(async (userId) => {
-    try {
-      const token = sessionStorage.getItem('token');
-      const response = await api.get(
-        `/users/${userId}/goals`
-      );
-      const data = response.data || {};
-      setGoals({
-        ...defaultGoals,
-        ...data,
-        smartGoals: Array.isArray(data.smartGoals) ? data.smartGoals : [],
-        milestones: Array.isArray(data.milestones) ? data.milestones : []
-      });
-    } catch (error) {
-      console.error('Error loading goals:', error);
-    } finally {
+  const UNITS = ["kg", "lbs", "reps", "mins", "km", "miles", "calories"];
+
+  useEffect(() => {
+    const userData = sessionStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      fetchGoals(parsedUser._id);
+    } else {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    const userData = sessionStorage.getItem('user');
-    if (userData) {
-      const parsed = JSON.parse(userData);
-      setUser(parsed);
-      loadGoals(parsed._id);
-    }
-  }, [loadGoals]);
-
-  const updateGoals = async () => {
-    if (!user) return;
-    
-    setSaving(true);
+  const fetchGoals = async (userId) => {
     try {
-      const token = sessionStorage.getItem('token');
-      await api.put(
-        `/users/${user._id}/goals`,
-        {
-          dailyWorkouts: goals.dailyWorkouts,
-          weeklyWorkouts: goals.weeklyWorkouts,
-          monthlyWorkouts: goals.monthlyWorkouts,
-          smartGoals: goals.smartGoals,
-          milestones: goals.milestones,
-          targetWeight: goals.targetWeight,
-          targetBodyFat: goals.targetBodyFat,
-          targetMuscleMass: goals.targetMuscleMass
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      alert('Goals updated successfully! 🎯');
-    } catch (error) {
-      console.error('Error updating goals:', error);
-      alert('Failed to update goals. Please try again.');
+      setLoading(true);
+      const res = await api.get(`/users/${userId}/goals`);
+      setGoals(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch goals:", err);
+      setError("Could not load goals. Please try again.");
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  const addSmartGoal = () => {
-    if (!newSmartGoal.title || !newSmartGoal.targetValue || !newSmartGoal.deadline) {
-      alert('Please fill in all required fields');
-      return;
+  const handleAddGoal = async (e) => {
+    e.preventDefault();
+    if (!newGoal.title.trim() || !newGoal.target) return;
+    setSubmitting(true);
+    try {
+      const res = await api.post(`/users/${user._id}/goals`, {
+        title: newGoal.title,
+        target: Number(newGoal.target),
+        unit: newGoal.unit,
+      });
+      setGoals(res.data?.goals || [...goals, res.data]);
+      setNewGoal({ title: "", target: "", unit: "kg" });
+    } catch (err) {
+      console.error("Failed to add goal:", err);
+      alert("Failed to add goal. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    const smartGoal = {
-      ...newSmartGoal,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      progress: 0,
-      status: 'active'
-    };
-
-    setGoals(prev => ({
-      ...prev,
-      smartGoals: [...(prev.smartGoals || []), smartGoal]
-    }));
-
-    setNewSmartGoal({
-      title: '',
-      description: '',
-      targetValue: '',
-      currentValue: '0',
-      unit: '',
-      deadline: '',
-      category: 'fitness',
-      priority: 'medium'
-    });
-    setShowSmartGoalForm(false);
   };
 
-  const updateSmartGoalProgress = (goalId, newProgress) => {
-    setGoals(prev => ({
-      ...prev,
-      smartGoals: (prev.smartGoals || []).map(goal => 
-        goal.id === goalId 
-          ? { ...goal, currentValue: newProgress, progress: Math.min((newProgress / goal.targetValue) * 100, 100) }
-          : goal
-      )
-    }));
+  const handleToggleGoal = async (goalId, currentStatus) => {
+    try {
+      const res = await api.put(`/users/${user._id}/goals/${goalId}`, {
+        completed: !currentStatus,
+      });
+      setGoals(res.data?.goals || goals.map(g => g._id === goalId ? { ...g, completed: !currentStatus } : g));
+    } catch (err) {
+      console.error("Failed to update goal:", err);
+    }
   };
 
-  const deleteSmartGoal = (goalId) => {
-    setGoals(prev => ({
-      ...prev,
-      smartGoals: (prev.smartGoals || []).filter(goal => goal.id !== goalId)
-    }));
+  const handleDeleteGoal = async (goalId) => {
+    try {
+      await api.delete(`/users/${user._id}/goals/${goalId}`);
+      setGoals(goals.filter(g => g._id !== goalId));
+    } catch (err) {
+      console.error("Failed to delete goal:", err);
+    }
   };
 
-  const getPriorityColor = (priority) => {
-    const colors = {
-      low: '#4CAF50',
-      medium: '#FF9800',
-      high: '#F44336'
-    };
-    return colors[priority] || '#666';
-  };
+  const completedCount = goals.filter(g => g.completed).length;
+  const progress = goals.length > 0 ? Math.round((completedCount / goals.length) * 100) : 0;
 
-  const getCategoryIcon = (category) => {
-    const icons = {
-      fitness: '💪',
-      weight: '⚖️',
-      strength: '🏋️',
-      endurance: '🏃',
-      flexibility: '🤸',
-      nutrition: '🥗'
-    };
-    return icons[category] || '🎯';
-  };
-
-  const handleInputChange = (field, value) => {
-    const numValue = parseInt(value) || 0;
-    setGoals(prev => ({
-      ...prev,
-      [field]: Math.max(0, numValue)
-    }));
-  };
-
-  if (loading) {
+  if (!user) {
     return (
-      <div className="goals-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading your goals...</p>
+      <div className="goals-page">
+        <div className="goals-login-prompt">
+          <div className="lock-icon">🔒</div>
+          <h2>Login Required</h2>
+          <p>Please login to track your fitness goals.</p>
+          <a href="/login" className="goals-login-btn">Go to Login</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="goals-container">
+    <div className="goals-page">
+      {/* Header */}
       <div className="goals-header">
         <h1>🎯 My Fitness Goals</h1>
-        <p>Set your workout targets and track your progress</p>
+        <p>Set targets, stay consistent, and crush every goal!</p>
       </div>
 
-      <div className="goals-content">
-        <div className="goals-stats">
-          <div className="stat-card">
-            <div className="stat-icon">🔥</div>
-            <div className="stat-info">
-              <h3>{goals.currentStreak}</h3>
-              <p>Current Streak</p>
-            </div>
+      {/* Progress Summary */}
+      {goals.length > 0 && (
+        <div className="goals-progress-card">
+          <div className="progress-stats">
+            <span className="progress-label">Overall Progress</span>
+            <span className="progress-fraction">{completedCount}/{goals.length} goals completed</span>
           </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon">🏆</div>
-            <div className="stat-info">
-              <h3>{goals.longestStreak}</h3>
-              <p>Best Streak</p>
-            </div>
+          <div className="progress-bar-track">
+            <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
           </div>
-        </div>
-
-        <div className="goals-form">
-          <h2>Set Your Targets</h2>
-          
-          <div className="goal-input-group">
-            <label htmlFor="dailyWorkouts">Daily Workouts</label>
-            <div className="input-with-unit">
-              <input
-                type="number"
-                id="dailyWorkouts"
-                value={goals.dailyWorkouts}
-                onChange={(e) => handleInputChange('dailyWorkouts', e.target.value)}
-                min="0"
-                max="10"
-              />
-              <span className="unit">per day</span>
-            </div>
-            <div className="target-progress-bar">
-               <div className="target-progress-fill" style={{ width: `${Math.min((goals.currentStreak > 0 ? 1 : 0) / (goals.dailyWorkouts || 1) * 100, 100)}%` }}></div>
-            </div>
-            <p className="input-help">How many workouts do you want to complete each day?</p>
-          </div>
-
-          <div className="goal-input-group">
-            <label htmlFor="weeklyWorkouts">Weekly Workouts</label>
-            <div className="input-with-unit">
-              <input
-                type="number"
-                id="weeklyWorkouts"
-                value={goals.weeklyWorkouts}
-                onChange={(e) => handleInputChange('weeklyWorkouts', e.target.value)}
-                min="0"
-                max="50"
-              />
-              <span className="unit">per week</span>
-            </div>
-            <div className="target-progress-bar">
-               <div className="target-progress-fill" style={{ width: `${Math.min(goals.currentStreak / (goals.weeklyWorkouts || 1) * 100, 100)}%` }}></div>
-            </div>
-            <p className="input-help">Total workouts you want to complete each week</p>
-          </div>
-
-          <div className="goal-input-group">
-            <label htmlFor="monthlyWorkouts">Monthly Workouts</label>
-            <div className="input-with-unit">
-              <input
-                type="number"
-                id="monthlyWorkouts"
-                value={goals.monthlyWorkouts}
-                onChange={(e) => handleInputChange('monthlyWorkouts', e.target.value)}
-                min="0"
-                max="200"
-              />
-              <span className="unit">per month</span>
-            </div>
-            <div className="target-progress-bar">
-               <div className="target-progress-fill" style={{ width: `${Math.min((goals.currentStreak * 3) / (goals.monthlyWorkouts || 1) * 100, 100)}%` }}></div>
-            </div>
-            <p className="input-help">Total workouts you want to complete each month</p>
-          </div>
-
-          <button 
-            className="save-goals-btn"
-            onClick={updateGoals}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : '💾 Save Goals'}
-          </button>
-        </div>
-
-        {/* SMART Goals Section */}
-        <div className="smart-goals-section">
-          <div className="section-header">
-            <h2>🎯 SMART Goals</h2>
-            <button 
-              className="add-goal-btn"
-              onClick={() => setShowSmartGoalForm(true)}
-            >
-              + Add SMART Goal
-            </button>
-          </div>
-
-          {!goals.smartGoals || goals.smartGoals.length === 0 ? (
-            <div className="empty-state">
-              <p>No SMART goals set yet. Create your first goal!</p>
-            </div>
-          ) : (
-            <div className="smart-goals-grid">
-              {(goals.smartGoals || []).map(goal => (
-                <div key={goal.id} className="smart-goal-card">
-                  <div className="goal-header">
-                    <div className="goal-title">
-                      <span className="category-icon">{getCategoryIcon(goal.category)}</span>
-                      <h3>{goal.title}</h3>
-                    </div>
-                    <div 
-                      className="priority-badge"
-                      style={{ backgroundColor: getPriorityColor(goal.priority) }}
-                    >
-                      {goal.priority}
-                    </div>
-                  </div>
-                  
-                  <p className="goal-description">{goal.description}</p>
-                  
-                  <div className="goal-progress">
-                    <div className="progress-info">
-                      <span>{goal.currentValue} / {goal.targetValue} {goal.unit}</span>
-                      <span>{Math.round(goal.progress)}%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill"
-                        style={{ width: `${Math.min(goal.progress, 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div className="goal-actions">
-                    <input
-                      type="number"
-                      placeholder="Update progress"
-                      value={goal.currentValue}
-                      onChange={(e) => updateSmartGoalProgress(goal.id, e.target.value)}
-                      className="progress-input"
-                    />
-                    <button 
-                      className="delete-goal-btn"
-                      onClick={() => deleteSmartGoal(goal.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  
-                  <div className="goal-meta">
-                    <span>Deadline: {new Date(goal.deadline).toLocaleDateString()}</span>
-                    <span>Category: {goal.category}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Body Composition Goals */}
-        <div className="body-composition-section">
-          <h2>📊 Body Composition Goals</h2>
-          <div className="composition-goals">
-            <div className="composition-goal">
-              <label>Target Weight (kg)</label>
-              <input
-                type="number"
-                value={goals.targetWeight || ''}
-                onChange={(e) => setGoals(prev => ({ ...prev, targetWeight: e.target.value }))}
-                placeholder="Enter target weight"
-              />
-            </div>
-            
-            <div className="composition-goal">
-              <label>Target Body Fat %</label>
-              <input
-                type="number"
-                value={goals.targetBodyFat || ''}
-                onChange={(e) => setGoals(prev => ({ ...prev, targetBodyFat: e.target.value }))}
-                placeholder="Enter target body fat %"
-                step="0.1"
-              />
-            </div>
-            
-            <div className="composition-goal">
-              <label>Target Muscle Mass (kg)</label>
-              <input
-                type="number"
-                value={goals.targetMuscleMass || ''}
-                onChange={(e) => setGoals(prev => ({ ...prev, targetMuscleMass: e.target.value }))}
-                placeholder="Enter target muscle mass"
-                step="0.1"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="goals-tips">
-          <h3>💡 Tips for Success</h3>
-          <ul>
-            <li>Start with achievable goals and gradually increase them</li>
-            <li>Consistency is more important than intensity</li>
-            <li>Track your progress daily to stay motivated</li>
-            <li>Celebrate small wins along the way</li>
-            <li>Use SMART goals: Specific, Measurable, Achievable, Relevant, Time-bound</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* SMART Goal Form Modal */}
-      {showSmartGoalForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Create SMART Goal</h2>
-              <button 
-                className="close-btn"
-                onClick={() => setShowSmartGoalForm(false)}
-              >
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={(e) => { e.preventDefault(); addSmartGoal(); }}>
-              <div className="form-group">
-                <label>Goal Title *</label>
-                <input
-                  type="text"
-                  value={newSmartGoal.title}
-                  onChange={(e) => setNewSmartGoal(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g., Run 5K in 25 minutes"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={newSmartGoal.description}
-                  onChange={(e) => setNewSmartGoal(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe your goal in detail..."
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Target Value *</label>
-                  <input
-                    type="number"
-                    value={newSmartGoal.targetValue}
-                    onChange={(e) => setNewSmartGoal(prev => ({ ...prev, targetValue: e.target.value }))}
-                    placeholder="25"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Unit</label>
-                  <input
-                    type="text"
-                    value={newSmartGoal.unit}
-                    onChange={(e) => setNewSmartGoal(prev => ({ ...prev, unit: e.target.value }))}
-                    placeholder="minutes"
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Category</label>
-                  <select
-                    value={newSmartGoal.category}
-                    onChange={(e) => setNewSmartGoal(prev => ({ ...prev, category: e.target.value }))}
-                  >
-                    <option value="fitness">Fitness</option>
-                    <option value="weight">Weight</option>
-                    <option value="strength">Strength</option>
-                    <option value="endurance">Endurance</option>
-                    <option value="flexibility">Flexibility</option>
-                    <option value="nutrition">Nutrition</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label>Priority</label>
-                  <select
-                    value={newSmartGoal.priority}
-                    onChange={(e) => setNewSmartGoal(prev => ({ ...prev, priority: e.target.value }))}
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Deadline *</label>
-                <input
-                  type="date"
-                  value={newSmartGoal.deadline}
-                  onChange={(e) => setNewSmartGoal(prev => ({ ...prev, deadline: e.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="form-actions">
-                <button 
-                  type="button"
-                  className="cancel-btn"
-                  onClick={() => setShowSmartGoalForm(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="save-btn"
-                >
-                  Create Goal
-                </button>
-              </div>
-            </form>
-          </div>
+          <span className="progress-percent">{progress}%</span>
         </div>
       )}
+
+      {/* Add Goal Form */}
+      <div className="goals-form-card">
+        <h2>➕ Add New Goal</h2>
+        <form className="goals-form" onSubmit={handleAddGoal}>
+          <input
+            type="text"
+            className="goals-input"
+            placeholder="e.g. Bench Press, Run 5K, Lose weight..."
+            value={newGoal.title}
+            onChange={e => setNewGoal({ ...newGoal, title: e.target.value })}
+            required
+          />
+          <div className="goals-target-row">
+            <input
+              type="number"
+              className="goals-input goals-number-input"
+              placeholder="Target"
+              min="0"
+              value={newGoal.target}
+              onChange={e => setNewGoal({ ...newGoal, target: e.target.value })}
+              required
+            />
+            <select
+              className="goals-select"
+              value={newGoal.unit}
+              onChange={e => setNewGoal({ ...newGoal, unit: e.target.value })}
+            >
+              {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+            </select>
+            <button
+              type="submit"
+              className="goals-add-btn"
+              disabled={submitting}
+            >
+              {submitting ? "Adding..." : "Add Goal"}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Goals List */}
+      <div className="goals-list">
+        {loading ? (
+          <div className="goals-loading">
+            <div className="goals-spinner"></div>
+            <p>Loading your goals...</p>
+          </div>
+        ) : error ? (
+          <div className="goals-error">
+            <p>{error}</p>
+            <button onClick={() => fetchGoals(user._id)} className="goals-retry-btn">Retry</button>
+          </div>
+        ) : goals.length === 0 ? (
+          <div className="goals-empty">
+            <div className="empty-icon">🎯</div>
+            <h3>No goals yet!</h3>
+            <p>Set your first fitness goal above and start crushing it! 💪</p>
+          </div>
+        ) : (
+          goals.map((goal) => (
+            <div
+              key={goal._id}
+              className={`goal-card ${goal.completed ? "goal-card--done" : ""}`}
+            >
+              <div className="goal-card-left">
+                <button
+                  className={`goal-check-btn ${goal.completed ? "checked" : ""}`}
+                  onClick={() => handleToggleGoal(goal._id, goal.completed)}
+                  title={goal.completed ? "Mark as incomplete" : "Mark as complete"}
+                >
+                  {goal.completed ? "✅" : "⬜"}
+                </button>
+                <div className="goal-info">
+                  <h3 className={`goal-title ${goal.completed ? "goal-title--done" : ""}`}>
+                    {goal.title}
+                  </h3>
+                  <span className="goal-target">
+                    🎯 Target: <strong>{goal.target} {goal.unit}</strong>
+                  </span>
+                  {goal.completed && (
+                    <span className="goal-badge">✨ Completed!</span>
+                  )}
+                </div>
+              </div>
+              <button
+                className="goal-delete-btn"
+                onClick={() => handleDeleteGoal(goal._id)}
+                title="Delete goal"
+              >
+                🗑️
+              </button>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

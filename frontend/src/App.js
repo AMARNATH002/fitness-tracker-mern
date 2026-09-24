@@ -165,19 +165,10 @@ function App() {
           </div>
         </nav>
 
-        {/* Dark Theme Sidebar */}
-        {isLoggedIn && (
-          <div className="sidebar">
-            <div className="sidebar-icon" title="Dashboard">📊</div>
-            <div className="sidebar-icon" title="Challenges">🏋️</div>
-            <div className="sidebar-icon" title="Schedule">📅</div>
-            <div className="sidebar-icon" title="Goals">⭐</div>
-            <div className="sidebar-icon" title="Settings">⚙️</div>
-          </div>
-        )}
+        {/* Sidebar removed as per user request */}
 
         {/* Routes */}
-        <main className={isLoggedIn ? 'with-sidebar' : ''}>
+        <main>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />

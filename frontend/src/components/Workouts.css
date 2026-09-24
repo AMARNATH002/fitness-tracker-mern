@@ -95,3 +95,72 @@
   font-weight: 700;
   border: 1px solid rgba(0, 212, 255, 0.2);
 }
+
+/* ── Complete / Reset buttons ── */
+.workout-card-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.wk-complete-btn {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #ff9800, #e65100);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wk-complete-btn:hover {
+  background: linear-gradient(135deg, #ffb74d, #ff9800);
+  transform: scale(1.03);
+}
+
+.wk-reset-btn {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #aaa;
+  border: 1px solid #555;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wk-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Done card border glow */
+.workout-card--done {
+  border-color: #4caf50;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.25);
+}
+
+/* Done overlay on image */
+.workout-image-container {
+  position: relative;
+}
+
+.workout-done-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(76, 175, 80, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  backdrop-filter: blur(2px);
+}
